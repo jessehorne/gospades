@@ -6,10 +6,10 @@ type Player struct {
 	Y                            int
 	ExistingPlayerPacketReceived bool
 	IP                           string
-	ID                           int
+	ID                           uint8
 }
 
-func NewPlayer(username string, id int, x int, y int, ip string) Player {
+func NewPlayer(username string, id uint8, x int, y int, ip string) Player {
 	return Player{
 		Username:                     username,
 		X:                            x,

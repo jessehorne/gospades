@@ -21,7 +21,10 @@ func ReadMapFromFile(path string) ([]byte, error) {
 
 func CompressMap(data []byte) []byte {
 	var compressed bytes.Buffer
-	w := zlib.NewWriter(&compressed)
+	w, err := zlib.NewWriterLevel(&compressed, zlib.DefaultCompression)
+	if err != nil {
+		return []byte{}
+	}
 	w.Write(data)
 	w.Close()
 

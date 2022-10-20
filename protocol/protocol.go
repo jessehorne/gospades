@@ -4,6 +4,7 @@ import (
 	"github.com/codecat/go-enet"
 	"github.com/jessehorne/gospades/game"
 	"github.com/jessehorne/gospades/util"
+	"time"
 )
 
 // Protocol information for Ace of Spades 0.75 according to (http://www.piqueserver.org/aosprotocol/protocol075.html)
@@ -16,45 +17,45 @@ const P_DISCONNECT_REASON_FULL = 4
 const P_DISCONNECT_REASON_KICKED = 10
 
 // Server from/to Client
-const P_POSITION = 0               // 13 bytes
-const P_ORIENTATION = 1            // 13 bytes
-const P_WORLD_UPDATE = 2           // 13 bytes
-const P_INPUT = 3                  // 3 bytes
-const P_WEAPON_INPUT = 4           // 3 bytes
-const P_SET_HP = 5                 // 15 bytes
-const P_GRENADE = 6                // 30 bytes
-const P_SET_TOOL = 7               // 3 bytes
-const P_SET_BLOCK = 8              // 5 bytes
-const P_EXISTING_PLAYER = 9        // ???
-const P_SHORT_EXISTING_PLAYER = 10 // 4 bytes
-const P_MOVE_OBJECT = 11           // 15 bytes
-const P_CREATE_PLAYER = 12         // ???
-const P_BLOCK_ACTION = 13          // 15 bytes
-const P_BLOCK_LINE = 14            // 26 bytes
+const P_POSITION uint8 = 0               // 13 bytes
+const P_ORIENTATION uint8 = 1            // 13 bytes
+const P_WORLD_UPDATE uint8 = 2           // 13 bytes
+const P_INPUT uint8 = 3                  // 3 bytes
+const P_WEAPON_INPUT uint8 = 4           // 3 bytes
+const P_SET_HP uint8 = 5                 // 15 bytes
+const P_GRENADE uint8 = 6                // 30 bytes
+const P_SET_TOOL uint8 = 7               // 3 bytes
+const P_SET_BLOCK uint8 = 8              // 5 bytes
+const P_EXISTING_PLAYER uint8 = 9        // ???
+const P_SHORT_EXISTING_PLAYER uint8 = 10 // 4 bytes
+const P_MOVE_OBJECT uint8 = 11           // 15 bytes
+const P_CREATE_PLAYER uint8 = 12         // ???
+const P_BLOCK_ACTION uint8 = 13          // 15 bytes
+const P_BLOCK_LINE uint8 = 14            // 26 bytes
 // const P_CTF_STATE = ??? // 52 bytes
 // const P_TC_STATE = ??? // ???
-const P_CHAT = 17 // ???
+const P_CHAT uint8 = 17 // ???
 
 // Server to Client
-const P_STATE_DATA = 15        // 52 bytes
-const P_KILL = 16              // 5 bytes
-const P_MAP_START uint8 = 18   // 5 bytes
-const P_MAP_CHUNK = 19         // ???
-const P_PLAYER_LEFT = 20       // 2 bytes
-const P_TERRITORY_CAPTURE = 21 // 5 bytes
-const P_PROGRESS_BAR = 22      // 8 bytes
-const P_INTEL_CAPTURE = 23     // 3 bytes
-const P_INTEL_PICKUP = 24      // 24 bytes
-const P_INTEL_DROP = 25        // 14 bytes
-const P_RESTOCK = 26           // 2 bytes
-const P_FOG_COLOUR = 27        // 5 bytes
+const P_STATE_DATA uint8 = 15        // 52 bytes
+const P_KILL uint8 = 16              // 5 bytes
+const P_MAP_START uint8 = 18         // 5 bytes
+const P_MAP_CHUNK uint8 = 19         // ???
+const P_PLAYER_LEFT uint8 = 20       // 2 bytes
+const P_TERRITORY_CAPTURE uint8 = 21 // 5 bytes
+const P_PROGRESS_BAR uint8 = 22      // 8 bytes
+const P_INTEL_CAPTURE uint8 = 23     // 3 bytes
+const P_INTEL_PICKUP uint8 = 24      // 24 bytes
+const P_INTEL_DROP uint8 = 25        // 14 bytes
+const P_RESTOCK uint8 = 26           // 2 bytes
+const P_FOG_COLOUR uint8 = 27        // 5 bytes
 
 // Client to Server
-const P_HIT = 5            // 3 bytes
-const P_WEAPON_RELOAD = 28 // 4 bytes
-const P_CHANGE_TEAM = 29   // 3 bytes
-const P_CHANGE_WEAPON = 30 // 3 bytes
-const P_MAP_CACHED = 31    // 2 bytes
+const P_HIT uint8 = 5            // 3 bytes
+const P_WEAPON_RELOAD uint8 = 28 // 4 bytes
+const P_CHANGE_TEAM uint8 = 29   // 3 bytes
+const P_CHANGE_WEAPON uint8 = 30 // 3 bytes
+const P_MAP_CACHED uint8 = 31    // 2 bytes
 
 var PacketTypes = map[int]string{
 	0:  "POSITION",
@@ -124,19 +125,26 @@ func HandleEventConnect(ev enet.Event, gs *game.State) {
 	}
 
 	// create player in gamestate
-	_, err := gs.AddPlayer(ev)
+	p, err := gs.AddPlayer(ev)
 	if err != nil {
 		ev.GetPeer().Disconnect(P_DISCONNECT_REASON_LIMIT_EXCEDED)
 	}
 
 	// Map stuff
-	compressedMap, mapSize, err := util.GetMapAndSize("./maps/cs_assault.vxl")
+	compressedMap, leCompressedMapSize, err := util.GetMapAndSize("./maps/2fort_arena.vxl")
 
 	// send newly connected player the Map Start packet
-	SendMapStart(ev, mapSize)
+	SendMapStart(ev, leCompressedMapSize)
 
 	// send newly connected player the Map Chunk packet (includes the whole map for now :D)
-	SendMapChunk(ev, compressedMap, mapSize)
+	SendMapChunk(ev, compressedMap)
+
+	go func() {
+		time.Sleep(5 * time.Second)
+
+		// send newly connected player the State Data packet to let the client know that the map is loaded and to continue on
+		SendStateData(ev, p.ID)
+	}()
 }
 
 func HandleDisconnect(ev enet.Event) {

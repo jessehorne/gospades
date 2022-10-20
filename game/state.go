@@ -36,7 +36,7 @@ func (gs *State) AddPlayer(ev enet.Event) (*Player, error) {
 	}
 
 	// add new player instance to list of players if not
-	newPlayer := NewPlayer("", len(gs.Players), 0, 0, playerIP)
+	newPlayer := NewPlayer("", uint8(len(gs.Players)+1), 0, 0, playerIP)
 	gs.Players[playerIP] = &newPlayer
 
 	return &newPlayer, nil
