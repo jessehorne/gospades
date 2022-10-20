@@ -1,8 +1,9 @@
 package protocol
 
 import (
+	"fmt"
 	"github.com/BenLubar/df2014/cp437"
-	"github.com/codecat/go-libs/log"
+	"github.com/jessehorne/gospades/game"
 )
 
 func NewMapStartPacket(mapSize []byte) []byte {
@@ -23,12 +24,13 @@ func NewMapChunkPacket(compressedMap []byte) []byte {
 	return buf
 }
 
-func NewStateDataPacket(playerID uint8) []byte {
+func NewStateDataPacket(playerID uint8, gs *game.State) []byte {
 	buf := make([]byte, 11)
 
 	buf[0] = P_STATE_DATA
 
 	buf[1] = playerID
+	fmt.Println("PLAYER ID", buf[1], playerID)
 
 	buf[2] = uint8(0) // fog blue
 	buf[3] = uint8(0) // fog green
@@ -43,12 +45,20 @@ func NewStateDataPacket(playerID uint8) []byte {
 	buf[10] = uint8(255) // team 2 red
 
 	// append 10 character CP437 string for team 1 name
-	team1Name := cp437.Bytes("RED TEAM  ")
+	team1Name := cp437.Bytes(gs.Team1Name)
 	buf = append(buf, team1Name...)
+	// padding if necessary
+	if len(team1Name) < 10 {
+		buf = append(buf, make([]byte, 10-len(team1Name))...)
+	}
 
 	// append 10 character CP437 string for team 2 name
-	team2Name := cp437.Bytes("BLUE TEAM ")
+	team2Name := cp437.Bytes(gs.Team2Name)
 	buf = append(buf, team2Name...)
+	// padding if necessary
+	if len(team2Name) < 10 {
+		buf = append(buf, make([]byte, 10-len(team2Name))...)
+	}
 
 	buf = append(buf, uint8(0)) // mode
 
@@ -66,7 +76,7 @@ func NewStateDataPacket(playerID uint8) []byte {
 
 	// intel flags - byte
 	buf = append(buf, uint8(0))
-	
+
 	// 0 float values for following location data for testing
 	leFloatBuf := make([]byte, 4)
 	leFloatBuf[0] = uint8(0)
@@ -92,25 +102,23 @@ func NewStateDataPacket(playerID uint8) []byte {
 	// flag2 z - float
 	buf = append(buf, leFloatBuf...)
 
-	// base1 x - float
+	// tent 1 x - float
 	buf = append(buf, leFloatBuf...)
 
-	// base1 y - float
+	// tent 1 y - float
 	buf = append(buf, leFloatBuf...)
 
-	// base1 z - float
+	// tent 1 z - float
 	buf = append(buf, leFloatBuf...)
 
-	// base2 x - float
+	// tent 2 x - float
 	buf = append(buf, leFloatBuf...)
 
-	// base2 y - float
+	// tent 2 y - float
 	buf = append(buf, leFloatBuf...)
 
-	// base2 z - float
+	// tent 2 z - float
 	buf = append(buf, leFloatBuf...)
-
-	log.Debug("STATE DATA PACKET SIZE: ", len(buf))
 
 	return buf
 }

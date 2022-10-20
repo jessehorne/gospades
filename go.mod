@@ -11,6 +11,7 @@ require (
 require (
 	github.com/BenLubar/df2014 v0.0.0-20170608221706-a0f82c11e116 // indirect
 	github.com/fatih/color v1.13.0 // indirect
+	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.9 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect

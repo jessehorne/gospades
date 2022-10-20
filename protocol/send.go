@@ -3,6 +3,7 @@ package protocol
 import (
 	"github.com/codecat/go-enet"
 	"github.com/codecat/go-libs/log"
+	"github.com/jessehorne/gospades/game"
 )
 
 func SendMapStart(ev enet.Event, mapSize []byte) {
@@ -45,8 +46,8 @@ func SendMapChunk(ev enet.Event, compressedMap []byte) {
 	ev.GetPeer().SendBytes(packet, 0, enet.PacketFlagReliable)
 }
 
-func SendStateData(ev enet.Event, playerID uint8) {
-	packet := NewStateDataPacket(playerID)
+func SendStateData(ev enet.Event, playerID uint8, gs *game.State) {
+	packet := NewStateDataPacket(playerID, gs)
 
 	log.Debug("[PACKET] Sending State Data. Total Packet Size: %d", len(packet))
 

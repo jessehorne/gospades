@@ -1,10 +1,11 @@
 package protocol
 
 import (
+	"github.com/BenLubar/df2014/cp437"
 	"github.com/codecat/go-enet"
+	"github.com/codecat/go-libs/log"
 	"github.com/jessehorne/gospades/game"
 	"github.com/jessehorne/gospades/util"
-	"time"
 )
 
 // Protocol information for Ace of Spades 0.75 according to (http://www.piqueserver.org/aosprotocol/protocol075.html)
@@ -139,14 +140,58 @@ func HandleEventConnect(ev enet.Event, gs *game.State) {
 	// send newly connected player the Map Chunk packet (includes the whole map for now :D)
 	SendMapChunk(ev, compressedMap)
 
-	go func() {
-		time.Sleep(5 * time.Second)
-
-		// send newly connected player the State Data packet to let the client know that the map is loaded and to continue on
-		SendStateData(ev, p.ID)
-	}()
+	// send newly connected player the State Data packet to let the client know that the map is loaded and to continue on
+	SendStateData(ev, p.ID, gs)
 }
 
-func HandleDisconnect(ev enet.Event) {
-	// TODO
+func HandleDisconnect(ev enet.Event, gs *game.State) {
+	ip := ev.GetPeer().GetAddress().String()
+	gs.RemovePlayerByIP(ip)
+}
+
+func HandleEventPacketReceived(ev enet.Event, gs *game.State) {
+	// Get the packet
+	packet := ev.GetPacket()
+	data := packet.GetData()
+
+	// We must destroy the packet when we're done with it
+	defer packet.Destroy()
+
+	// get packet id
+	packetID := data[0]
+
+	if packetID == 9 {
+		HandlePacketExistingPlayer(data[1:], gs)
+	}
+
+	log.Info("[PACKET]", packet.GetData())
+}
+
+func HandlePacketExistingPlayer(data []byte, gs *game.State) {
+	playerID := data[0]
+	team := data[1]
+	weapon := data[2]
+	held := data[3]
+
+	kills := data[4:8]
+
+	blue := data[8]
+	green := data[9]
+	red := data[10]
+	color := util.NewVec3()
+	color.X = red
+	color.Y = blue
+	color.Z = green
+
+	name := data[11:]
+
+	// update with gamestate
+	if err := gs.UpdatePlayer(playerID, name, team, weapon, held, kills, color); err != nil {
+		log.Error("[UPDATE PLAYER] " + err.Error())
+	} else {
+		log.Info("[UPDATE PLAYER] Updated player %v", playerID)
+	}
+
+	log.Debug("[EXISTING PLAYER PACKET RECEIVED] PlayerID: %d, Team: %d, Weapon: %d, Held: %d, Kills: %d, R,G,B: (%d, %d, %d), Name: %s",
+		playerID, team, weapon, held, kills, red, blue, green, cp437.String(name))
 }

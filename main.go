@@ -5,11 +5,53 @@ import (
 	"github.com/codecat/go-libs/log"
 	"github.com/jessehorne/gospades/game"
 	"github.com/jessehorne/gospades/protocol"
+	"github.com/joho/godotenv"
+	"os"
+	"strconv"
 )
 
 func main() {
+	// load .env
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	// TODO: verify that required env vars be set
+
+	// Config Validation
+	serverName := os.Getenv("SERVER_NAME")
+	if serverName == "" {
+		log.Error("Incorrect `SERVER_NAME` environment variable.")
+		return
+	}
+
+	maxPlayersEnv := os.Getenv("MAX_PLAYERS")
+	if maxPlayersEnv == "" {
+		log.Error("Incorrect `MAX_PLAYERS` environment variable.")
+		return
+	}
+	maxPlayersInt, err := strconv.Atoi(maxPlayersEnv)
+	maxPlayers := uint8(maxPlayersInt)
+	if maxPlayers < 0 || maxPlayers > 64 {
+		log.Error("Incorrect `MAX_PLAYERS` environment variable value. Must be between 0 and 64.")
+		return
+	}
+
+	team1Name := os.Getenv("TEAM_1_NAME")
+	if len(team1Name) < 1 || len(team1Name) > 10 {
+		log.Error("Incorrect `TEAM_1_NAME` environment variable.")
+		return
+	}
+
+	team2Name := os.Getenv("TEAM_2_NAME")
+	if len(team2Name) < 1 || len(team2Name) > 10 {
+		log.Error("Incorrect `TEAM_2_NAME` environment variable.")
+		return
+	}
+
 	// init gamestate
-	gamestate := game.NewState()
+	gamestate := game.NewState(serverName, maxPlayers, team1Name, team2Name)
 
 	// init enet stuff
 	enet.Initialize()
@@ -37,16 +79,9 @@ func main() {
 		case enet.EventConnect: // A new peer has connected
 			protocol.HandleEventConnect(ev, &gamestate)
 		case enet.EventDisconnect: // A connected peer has disconnected
-			log.Info("Peer disconnected: %s", ev.GetPeer().GetAddress())
-
+			protocol.HandleDisconnect(ev, &gamestate)
 		case enet.EventReceive: // A peer sent us some data
-			// Get the packet
-			packet := ev.GetPacket()
-
-			// We must destroy the packet when we're done with it
-			defer packet.Destroy()
-
-			log.Info("[PACKET]", packet.GetData())
+			protocol.HandleEventPacketReceived(ev, &gamestate)
 		}
 	}
 
