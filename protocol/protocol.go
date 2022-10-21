@@ -162,6 +162,12 @@ func HandleEventPacketReceived(ev enet.Event, gs *game.State) {
 
 	if packetID == 9 {
 		HandlePacketExistingPlayer(data[1:], gs)
+
+		// send all players the newly connected player data including current player??
+		newPlayer, err := gs.GetPlayerByIP(ev.GetPeer().GetAddress().String())
+		if err == nil {
+			SendCreatePlayerToAllPlayers(ev, gs, newPlayer)
+		}
 	}
 
 	log.Info("[PACKET]", packet.GetData())

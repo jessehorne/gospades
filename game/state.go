@@ -49,7 +49,8 @@ func (gs *State) GetPlayerByID(id uint8) (*Player, error) {
 }
 
 func (gs *State) AddPlayer(ev enet.Event) (*Player, error) {
-	playerIP := ev.GetPeer().GetAddress().String()
+	peer := ev.GetPeer()
+	playerIP := peer.GetAddress().String()
 
 	// check if player already exists with address
 	_, err := gs.GetPlayerByIP(playerIP)
@@ -59,7 +60,7 @@ func (gs *State) AddPlayer(ev enet.Event) (*Player, error) {
 
 	// add new player instance to list of players if not
 	newPlayerID := uint8(len(gs.Players))
-	newPlayer := NewPlayer("", newPlayerID, playerIP)
+	newPlayer := NewPlayer(peer, "", newPlayerID, playerIP)
 	gs.Players[newPlayerID] = &newPlayer
 
 	return &newPlayer, nil

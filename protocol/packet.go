@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/BenLubar/df2014/cp437"
 	"github.com/jessehorne/gospades/game"
+	"github.com/jessehorne/gospades/util"
 )
 
 func NewMapStartPacket(mapSize []byte) []byte {
@@ -119,6 +120,29 @@ func NewStateDataPacket(playerID uint8, gs *game.State) []byte {
 
 	// tent 2 z - float
 	buf = append(buf, leFloatBuf...)
+
+	return buf
+}
+
+func NewCreatePlayerPacket(p *game.Player) []byte {
+	buf := make([]byte, 4)
+
+	buf[0] = P_CREATE_PLAYER
+	buf[1] = p.ID
+	buf[2] = p.Weapon
+	buf[3] = p.Team
+
+	// x position
+	buf = append(buf, util.Float32ToBytes(p.Position.X)...)
+
+	// y position
+	buf = append(buf, util.Float32ToBytes(p.Position.Y)...)
+
+	// z position
+	buf = append(buf, util.Float32ToBytes(p.Position.Z)...)
+
+	// name
+	buf = append(buf, cp437.Bytes(p.Username)...)
 
 	return buf
 }

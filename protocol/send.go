@@ -53,3 +53,14 @@ func SendStateData(ev enet.Event, playerID uint8, gs *game.State) {
 
 	ev.GetPeer().SendBytes(packet, 0, enet.PacketFlagReliable)
 }
+
+func SendCreatePlayerToAllPlayers(ev enet.Event, gs *game.State, newPlayer *game.Player) {
+	packet := NewCreatePlayerPacket(newPlayer)
+
+	for p := range gs.Players {
+		player := gs.Players[p]
+		player.Peer.SendBytes(packet, 0, enet.PacketFlagReliable)
+	}
+
+	log.Debug("[PACKET] Sending Create Player to %d players.", len(gs.Players))
+}
