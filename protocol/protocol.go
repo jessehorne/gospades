@@ -151,7 +151,7 @@ func HandleEventPacketReceived(ev enet.Event, gs *game.State) {
 	packet := ev.GetPacket()
 	data := packet.GetData()
 
-	log.Info("[PACKET]", packet.GetData())
+	//log.Info("[PACKET]", packet.GetData())
 
 	// We must destroy the packet when we're done with it
 	defer packet.Destroy()
@@ -163,6 +163,12 @@ func HandleEventPacketReceived(ev enet.Event, gs *game.State) {
 	case 0:
 		// Update Player Position
 		HandlePacketPositionData(ev, gs, data[1:])
+	case 1:
+		// Update Player Orientation
+		HandlePacketOrientationData(ev, gs, data[1:])
+	case 3:
+		// Update Player Input Data
+		HandlePacketInputData(gs, data[1:])
 	case 8:
 		// Set Block Color
 		HandlePacketSetBlockColor(data[1:], gs)
@@ -230,4 +236,35 @@ func HandlePacketPositionData(ev enet.Event, gs *game.State, data []byte) {
 	p.Position.Z = util.Float32FromBytes(data[8:12])
 
 	log.Debug("[POSITION DATA] Updating Player '%s' to XYZ: %d,%d,%d", p.Position.Z, p.Position.Y, p.Position.Z)
+}
+
+func HandlePacketOrientationData(ev enet.Event, gs *game.State, data []byte) {
+	ip := ev.GetPeer().GetAddress().String()
+
+	p, err := gs.GetPlayerByIP(ip)
+	if err != nil {
+		log.Error("[ORIENTATION DATA] Couldn't set orientation on server of player that doesn't exist with IP of %s", ip)
+		return
+	}
+
+	p.Orientation.X = util.Float32FromBytes(data[0:4])
+	p.Orientation.Y = util.Float32FromBytes(data[4:8])
+	p.Orientation.Z = util.Float32FromBytes(data[8:12])
+
+	log.Debug("[ORIENTATION DATA] Updating Player '%s' to XYZ: %d,%d,%d", p.Orientation.Z, p.Orientation.Y, p.Orientation.Z)
+}
+
+func HandlePacketInputData(gs *game.State, data []byte) {
+	playerID := data[0]
+	keyState := data[1]
+
+	p, err := gs.GetPlayerByID(playerID)
+	if err != nil {
+		log.Error("[INPUT DATA] Couldn't update key state on server of player #%d", playerID)
+		return
+	}
+
+	p.KeyState = keyState
+
+	log.Debug("[INPUT DATA] Updating Player '%d' input data key state", playerID)
 }

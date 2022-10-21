@@ -18,6 +18,7 @@ type Player struct {
 	Kills                        uint32
 	BlockColor                   util.Color
 	Peer                         enet.Peer
+	KeyState                     uint8
 }
 
 func NewPlayer(peer enet.Peer, username string, id uint8, ip string) Player {
@@ -35,4 +36,36 @@ func NewPlayer(peer enet.Peer, username string, id uint8, ip string) Player {
 		BlockColor:                   util.NewColor(0, 0, 0),
 		Peer:                         peer,
 	}
+}
+
+func (p *Player) IsHoldingUp() bool {
+	return util.GetBit(p.KeyState, util.BIT_UP)
+}
+
+func (p *Player) IsHoldingDown() bool {
+	return util.GetBit(p.KeyState, util.BIT_DOWN)
+}
+
+func (p *Player) IsHoldingLeft() bool {
+	return util.GetBit(p.KeyState, util.BIT_LEFT)
+}
+
+func (p *Player) IsHoldingRight() bool {
+	return util.GetBit(p.KeyState, util.BIT_RIGHT)
+}
+
+func (p *Player) IsHoldingJump() bool {
+	return util.GetBit(p.KeyState, util.BIT_JUMP)
+}
+
+func (p *Player) IsHoldingCrouch() bool {
+	return util.GetBit(p.KeyState, util.BIT_CROUCH)
+}
+
+func (p *Player) IsHoldingSneak() bool {
+	return util.GetBit(p.KeyState, util.BIT_SNEAK)
+}
+
+func (p *Player) IsHoldingSprint() bool {
+	return util.GetBit(p.KeyState, util.BIT_SPRINT)
 }

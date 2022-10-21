@@ -5,6 +5,23 @@ import (
 	"math"
 )
 
+type bit byte
+
+const (
+	BIT_SPRINT bit = 0b0000_0001
+	BIT_SNEAK  bit = 0b0000_0010
+	BIT_CROUCH bit = 0b0000_0100
+	BIT_JUMP   bit = 0b0000_1000
+	BIT_RIGHT  bit = 0b0001_0000
+	BIT_LEFT   bit = 0b0010_0000
+	BIT_DOWN   bit = 0b0100_0000
+	BIT_UP     bit = 0b1000_0000
+)
+
+func GetBit(b byte, n bit) bool {
+	return b&byte(n) > 0
+}
+
 func ReverseBytes(b []byte) []byte {
 	reversed := make([]byte, len(b))
 	count := len(b) - 1
