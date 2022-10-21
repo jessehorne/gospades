@@ -131,14 +131,11 @@ func HandleEventConnect(ev enet.Event, gs *game.State) {
 		ev.GetPeer().Disconnect(P_DISCONNECT_REASON_LIMIT_EXCEDED)
 	}
 
-	// Map stuff
-	compressedMap, leCompressedMapSize, err := util.GetMapAndSize("./maps/2fort_arena.vxl")
-
 	// send newly connected player the Map Start packet
-	SendMapStart(ev, leCompressedMapSize)
+	SendMapStart(ev, gs.CompressedMapSize)
 
 	// send newly connected player the Map Chunk packet (includes the whole map for now :D)
-	SendMapChunk(ev, compressedMap)
+	SendMapChunk(ev, gs.CompressedMap)
 
 	// send newly connected player the State Data packet to let the client know that the map is loaded and to continue on
 	SendStateData(ev, p.ID, gs)

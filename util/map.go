@@ -4,19 +4,16 @@ import (
 	"bytes"
 	"compress/zlib"
 	"encoding/binary"
-	"github.com/codecat/go-libs/log"
 	"os"
 )
 
-func ReadMapFromFile(path string) ([]byte, error) {
+func ReadMapFromFile(path string) ([]byte, int, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return data, err
+		return data, 0, err
 	}
 
-	log.Debug("UNCOMPRESSED MAP SIZE: ", len(data))
-
-	return data, nil
+	return data, len(data), nil
 }
 
 func CompressMap(data []byte) []byte {
@@ -30,15 +27,13 @@ func CompressMap(data []byte) []byte {
 
 	compressedBytes := compressed.Bytes()
 
-	log.Debug("COMPRESSED MAP SIZE: ", len(compressedBytes))
-
 	return compressedBytes
 }
 
-func GetMapAndSize(path string) ([]byte, []byte, error) {
-	mapBytes, err := ReadMapFromFile(path)
+func GetMapAndSize(path string) ([]byte, []byte, int, error) {
+	mapBytes, mapSize, err := ReadMapFromFile(path)
 	if err != nil {
-		return mapBytes, []byte{}, err
+		return mapBytes, []byte{}, 0, err
 	}
 
 	compressed := CompressMap(mapBytes)
@@ -47,5 +42,5 @@ func GetMapAndSize(path string) ([]byte, []byte, error) {
 	mapSizeBuf := make([]byte, 4)
 	binary.LittleEndian.PutUint32(mapSizeBuf, uint32(bigEndianMapSize))
 
-	return compressed, mapSizeBuf, nil
+	return compressed, mapSizeBuf, mapSize, nil
 }

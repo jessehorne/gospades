@@ -51,7 +51,11 @@ func main() {
 	}
 
 	// init gamestate
-	gamestate := game.NewState(serverName, maxPlayers, team1Name, team2Name)
+	gamestate, err := game.NewState(serverName, maxPlayers, team1Name, team2Name)
+	if err != nil {
+		log.Error("Error initializing server", err.Error())
+		return
+	}
 
 	// init enet stuff
 	enet.Initialize()
