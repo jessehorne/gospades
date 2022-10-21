@@ -16,15 +16,15 @@ type Player struct {
 	Weapon                       uint8
 	Held                         uint8
 	Kills                        uint32
-	Color                        util.Vec3
+	BlockColor                   util.Color
 	Peer                         enet.Peer
 }
 
 func NewPlayer(peer enet.Peer, username string, id uint8, ip string) Player {
 	return Player{
 		Username:                     username,
-		Position:                     util.NewVec3Float(),
-		Orientation:                  util.NewVec3Float(),
+		Position:                     util.NewVec3Float(0.0, 0.0, 0.0),
+		Orientation:                  util.NewVec3Float(0.0, 0.0, 0.0),
 		ExistingPlayerPacketReceived: false,
 		IP:                           ip,
 		ID:                           id,
@@ -32,7 +32,7 @@ func NewPlayer(peer enet.Peer, username string, id uint8, ip string) Player {
 		Weapon:                       0,
 		Held:                         0,
 		Kills:                        0,
-		Color:                        util.NewVec3(),
+		BlockColor:                   util.NewColor(0, 0, 0),
 		Peer:                         peer,
 	}
 }

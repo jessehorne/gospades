@@ -77,7 +77,7 @@ func (gs *State) RemovePlayerByIP(ip string) {
 	delete(gs.Players, p.ID)
 }
 
-func (gs *State) UpdatePlayer(playerID uint8, name []byte, team uint8, weapon uint8, held uint8, kills []byte, color util.Vec3) error {
+func (gs *State) UpdatePlayer(playerID uint8, name []byte, team uint8, weapon uint8, held uint8, kills []byte, color util.Color) error {
 	p, err := gs.GetPlayerByID(playerID)
 	if err != nil {
 		return errors.New("can't update player because no player exists with that ID")
@@ -88,7 +88,20 @@ func (gs *State) UpdatePlayer(playerID uint8, name []byte, team uint8, weapon ui
 	p.Weapon = weapon
 	p.Held = held
 	p.Kills = binary.BigEndian.Uint32(kills)
-	p.Color = color
+	p.BlockColor = color
+
+	return nil
+}
+
+func (gs *State) UpdatePlayerBlockColor(playerID uint8, red uint8, green uint8, blue uint8) error {
+	p, err := gs.GetPlayerByID(playerID)
+	if err != nil {
+		return errors.New("can't update player because no player exists with that ID")
+	}
+
+	p.BlockColor.R = red
+	p.BlockColor.G = green
+	p.BlockColor.B = blue
 
 	return nil
 }

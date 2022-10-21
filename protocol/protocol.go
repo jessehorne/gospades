@@ -154,6 +154,8 @@ func HandleEventPacketReceived(ev enet.Event, gs *game.State) {
 	packet := ev.GetPacket()
 	data := packet.GetData()
 
+	log.Info("[PACKET]", packet.GetData())
+
 	// We must destroy the packet when we're done with it
 	defer packet.Destroy()
 
@@ -168,9 +170,9 @@ func HandleEventPacketReceived(ev enet.Event, gs *game.State) {
 		if err == nil {
 			SendCreatePlayerToAllPlayers(ev, gs, newPlayer)
 		}
+	} else if packetID == 8 {
+		HandlePacketSetBlockColor(data[1:], gs)
 	}
-
-	log.Info("[PACKET]", packet.GetData())
 }
 
 func HandlePacketExistingPlayer(data []byte, gs *game.State) {
@@ -184,20 +186,29 @@ func HandlePacketExistingPlayer(data []byte, gs *game.State) {
 	blue := data[8]
 	green := data[9]
 	red := data[10]
-	color := util.NewVec3()
-	color.X = red
-	color.Y = blue
-	color.Z = green
+	color := util.NewColor(red, blue, green)
 
 	name := data[11:]
 
 	// update with gamestate
 	if err := gs.UpdatePlayer(playerID, name, team, weapon, held, kills, color); err != nil {
 		log.Error("[UPDATE PLAYER] " + err.Error())
-	} else {
-		log.Info("[UPDATE PLAYER] Updated player %v", playerID)
+		return
 	}
 
 	log.Debug("[EXISTING PLAYER PACKET RECEIVED] PlayerID: %d, Team: %d, Weapon: %d, Held: %d, Kills: %d, R,G,B: (%d, %d, %d), Name: %s",
 		playerID, team, weapon, held, kills, red, blue, green, cp437.String(name))
+}
+
+func HandlePacketSetBlockColor(data []byte, gs *game.State) {
+	playerID := data[0]
+	blue := data[1]
+	green := data[2]
+	red := data[3]
+
+	if err := gs.UpdatePlayerBlockColor(playerID, red, green, blue); err != nil {
+		log.Error("[BLOCK COLOR] ", err.Error())
+	}
+
+	log.Debug("[BLOCK COLOR] Set for player %d", playerID)
 }
