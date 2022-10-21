@@ -159,7 +159,15 @@ func HandleEventPacketReceived(ev enet.Event, gs *game.State) {
 	// get packet id
 	packetID := data[0]
 
-	if packetID == 9 {
+	switch packetID {
+	case 0:
+		// Update Player Position
+		HandlePacketPositionData(ev, gs, data[1:])
+	case 8:
+		// Set Block Color
+		HandlePacketSetBlockColor(data[1:], gs)
+	case 9:
+		// Existing Player
 		HandlePacketExistingPlayer(data[1:], gs)
 
 		// send all players the newly connected player data including current player??
@@ -167,8 +175,6 @@ func HandleEventPacketReceived(ev enet.Event, gs *game.State) {
 		if err == nil {
 			SendCreatePlayerToAllPlayers(ev, gs, newPlayer)
 		}
-	} else if packetID == 8 {
-		HandlePacketSetBlockColor(data[1:], gs)
 	}
 }
 
@@ -208,4 +214,20 @@ func HandlePacketSetBlockColor(data []byte, gs *game.State) {
 	}
 
 	log.Debug("[BLOCK COLOR] Set for player %d", playerID)
+}
+
+func HandlePacketPositionData(ev enet.Event, gs *game.State, data []byte) {
+	ip := ev.GetPeer().GetAddress().String()
+
+	p, err := gs.GetPlayerByIP(ip)
+	if err != nil {
+		log.Error("[POSITION DATA] Couldn't set position on server of player that doesn't exist with IP of %s", ip)
+		return
+	}
+
+	p.Position.X = util.Float32FromBytes(data[0:4])
+	p.Position.Y = util.Float32FromBytes(data[4:8])
+	p.Position.Z = util.Float32FromBytes(data[8:12])
+
+	log.Debug("[POSITION DATA] Updating Player '%s' to XYZ: %d,%d,%d", p.Position.Z, p.Position.Y, p.Position.Z)
 }
