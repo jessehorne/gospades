@@ -137,6 +137,17 @@ func HandlePacketWeaponInput(ev enet.Event, gs *game.State, data []byte) {
 	}
 
 	p.WeaponState = weaponState
+}
 
-	log.Debug("FIRING! Primary: %v | Secondary: %v", p.IsFiringPrimary(), p.IsFiringSecondary())
+func HandlePacketSetTool(ev enet.Event, gs *game.State, data []byte) {
+	playerID := data[0]
+	tool := data[1]
+
+	p, err := gs.GetPlayerByID(playerID)
+	if err != nil {
+		log.Error("[SET TOOL] Couldn't update tool on server of player #%d", playerID)
+		return
+	}
+
+	p.Tool = tool
 }

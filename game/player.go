@@ -20,6 +20,7 @@ type Player struct {
 	Peer                         enet.Peer
 	KeyState                     uint8
 	WeaponState                  uint8
+	Tool                         uint8 // 0-spade, 1-block, 2-gun, 3-grenade
 }
 
 func NewPlayer(peer enet.Peer, username string, id uint8, ip string) Player {
@@ -38,6 +39,7 @@ func NewPlayer(peer enet.Peer, username string, id uint8, ip string) Player {
 		Peer:                         peer,
 		KeyState:                     0,
 		WeaponState:                  0,
+		Tool:                         0,
 	}
 }
 
