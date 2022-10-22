@@ -125,3 +125,18 @@ func HandlePacketInputData(ev enet.Event, gs *game.State, data []byte) {
 
 	//log.Debug("[INPUT DATA] Updating Player '%d' input data key state", playerID)
 }
+
+func HandlePacketWeaponInput(ev enet.Event, gs *game.State, data []byte) {
+	playerID := data[0]
+	weaponState := data[1]
+
+	p, err := gs.GetPlayerByID(playerID)
+	if err != nil {
+		log.Error("[WEAPON INPUT] Couldn't update weapon state on server of player #%d", playerID)
+		return
+	}
+
+	p.WeaponState = weaponState
+
+	log.Debug("FIRING! Primary: %v | Secondary: %v", p.IsFiringPrimary(), p.IsFiringSecondary())
+}

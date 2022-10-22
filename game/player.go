@@ -19,6 +19,7 @@ type Player struct {
 	BlockColor                   util.Color
 	Peer                         enet.Peer
 	KeyState                     uint8
+	WeaponState                  uint8
 }
 
 func NewPlayer(peer enet.Peer, username string, id uint8, ip string) Player {
@@ -35,6 +36,8 @@ func NewPlayer(peer enet.Peer, username string, id uint8, ip string) Player {
 		Kills:                        0,
 		BlockColor:                   util.NewColor(0, 0, 0),
 		Peer:                         peer,
+		KeyState:                     0,
+		WeaponState:                  0,
 	}
 }
 
@@ -68,4 +71,12 @@ func (p *Player) IsHoldingSneak() bool {
 
 func (p *Player) IsHoldingSprint() bool {
 	return util.GetBit(p.KeyState, util.BIT_SPRINT)
+}
+
+func (p *Player) IsFiringPrimary() bool {
+	return util.GetBit(p.WeaponState, util.BIT_WEAPON_PRIMARY)
+}
+
+func (p *Player) IsFiringSecondary() bool {
+	return util.GetBit(p.WeaponState, util.BIT_WEAPON_SECONDARY)
 }

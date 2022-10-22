@@ -142,6 +142,7 @@ func InitPacketHandlers() {
 	AddPacketFunction(0, HandlePacketPositionData)
 	AddPacketFunction(1, HandlePacketOrientationData)
 	AddPacketFunction(3, HandlePacketInputData)
+	AddPacketFunction(4, HandlePacketWeaponInput)
 	AddPacketFunction(8, HandlePacketSetBlockColor)
 	AddPacketFunction(9, HandlePacketExistingPlayer)
 }

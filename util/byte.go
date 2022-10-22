@@ -16,6 +16,9 @@ const (
 	BIT_LEFT   bit = 0b0010_0000
 	BIT_DOWN   bit = 0b0100_0000
 	BIT_UP     bit = 0b1000_0000
+
+	BIT_WEAPON_PRIMARY   bit = 0b0000_0001
+	BIT_WEAPON_SECONDARY bit = 0b0000_0010
 )
 
 func GetBit(b byte, n bit) bool {
