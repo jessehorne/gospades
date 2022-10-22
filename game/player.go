@@ -21,6 +21,7 @@ type Player struct {
 	KeyState                     uint8
 	WeaponState                  uint8
 	Tool                         uint8 // 0-spade, 1-block, 2-gun, 3-grenade
+	Health                       uint8
 }
 
 func NewPlayer(peer enet.Peer, username string, id uint8, ip string) Player {
@@ -40,6 +41,7 @@ func NewPlayer(peer enet.Peer, username string, id uint8, ip string) Player {
 		KeyState:                     0,
 		WeaponState:                  0,
 		Tool:                         0,
+		Health:                       100,
 	}
 }
 
@@ -81,4 +83,8 @@ func (p *Player) IsFiringPrimary() bool {
 
 func (p *Player) IsFiringSecondary() bool {
 	return util.GetBit(p.WeaponState, util.BIT_WEAPON_SECONDARY)
+}
+
+func (p *Player) Hit(dmg uint8) {
+	p.Health -= dmg
 }

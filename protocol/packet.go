@@ -169,3 +169,13 @@ func NewWorldUpdatePacket(gs *game.State) []byte {
 
 	return buf
 }
+
+func NewSetHPPacket(p *game.Player, damageType uint8) []byte {
+	var buf []byte
+	buf = append(buf, p.Health)
+	buf = append(buf, damageType)
+	buf = append(buf, util.Float32ToBytes(p.Position.X)...)
+	buf = append(buf, util.Float32ToBytes(p.Position.Y)...)
+	buf = append(buf, util.Float32ToBytes(p.Position.Z)...)
+	return buf
+}

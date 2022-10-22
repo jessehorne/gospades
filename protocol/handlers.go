@@ -191,3 +191,43 @@ func HandlePacketBlockLine(ev enet.Event, gs *game.State, data []byte) {
 
 	SendBlockLineToAllPlayers(gs, newPacket)
 }
+
+func HandlePacketHitPacket(ev enet.Event, gs *game.State, data []byte) {
+	playerShootingIP := ev.GetPeer().GetAddress().String()
+	_, err := gs.GetPlayerByIP(playerShootingIP)
+	if err != nil {
+		return
+	}
+
+	playerHitID := data[0]
+	_, err = gs.GetPlayerByID(playerHitID)
+	if err != nil {
+		return
+	}
+
+	hitType := data[1]
+
+	damagedPlayer, err := gs.GetPlayerByID(playerHitID)
+	if err != nil {
+		return
+	}
+
+	var damage uint8
+
+	if hitType == game.HIT_TYPE_TORSO {
+		damage = gs.Config.DamageTorso
+	} else if hitType == game.HIT_TYPE_HEAD {
+		damage = gs.Config.DamageHead
+	} else if hitType == game.HIT_TYPE_ARMS {
+		damage = gs.Config.DamageArms
+	} else if hitType == game.HIT_TYPE_LEGS {
+		damage = gs.Config.DamageLegs
+	} else if hitType == game.HIT_TYPE_MELEE {
+		damage = gs.Config.DamageMelee
+	}
+
+	damagedPlayer.Hit(damage)
+
+	// send Set HP to damaged player
+	SendSetHP(damagedPlayer, game.DAMAGE_TYPE_WEAPON)
+}
