@@ -57,6 +57,9 @@ func main() {
 		return
 	}
 
+	// initialize packet handlers
+	protocol.InitPacketHandlers()
+
 	// init enet stuff
 	enet.Initialize()
 
@@ -67,7 +70,7 @@ func main() {
 	}
 	host.CompressWithRangeCoder()
 
-	log.Info("Server started on port 3030")
+	log.Info("gospades v0.0.1 started on port 3030")
 
 	// The event loop
 	for true {
@@ -85,7 +88,7 @@ func main() {
 		case enet.EventDisconnect: // A connected peer has disconnected
 			protocol.HandleDisconnect(ev, &gamestate)
 		case enet.EventReceive: // A peer sent us some data
-			protocol.HandleEventPacketReceived(ev, &gamestate)
+			protocol.PacketHandler(ev, &gamestate)
 		}
 	}
 

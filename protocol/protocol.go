@@ -1,11 +1,9 @@
 package protocol
 
 import (
-	"github.com/BenLubar/df2014/cp437"
 	"github.com/codecat/go-enet"
 	"github.com/codecat/go-libs/log"
 	"github.com/jessehorne/gospades/game"
-	"github.com/jessehorne/gospades/util"
 )
 
 // Protocol information for Ace of Spades 0.75 according to (http://www.piqueserver.org/aosprotocol/protocol075.html)
@@ -93,16 +91,16 @@ var PacketTypes = map[int]string{
 	31: "MAP_CACHED",
 }
 
+type PacketFunction func(enet.Event, *game.State, []byte)
+
+var PacketFuncs = map[uint8]PacketFunction{}
+
 func PacketTypeToString(p int) string {
 	v, exists := PacketTypes[p]
 	if !exists {
 		return ""
 	}
 	return v
-}
-
-func ParsePacket(b []byte) ([]byte, interface{}, error) {
-	return b, nil, nil
 }
 
 func GetVersionString(d uint32) string {
@@ -117,41 +115,14 @@ func GetVersionString(d uint32) string {
 	return "unknown"
 }
 
-func HandleEventConnect(ev enet.Event, gs *game.State) {
-	version := GetVersionString(ev.GetData())
-
-	if version == "unknown" {
-		ev.GetPeer().Disconnect(P_DISCONNECT_REASON_PROTOCOL)
-		return
-	}
-
-	// create player in gamestate
-	p, err := gs.AddPlayer(ev)
-	if err != nil {
-		ev.GetPeer().Disconnect(P_DISCONNECT_REASON_LIMIT_EXCEDED)
-	}
-
-	// send newly connected player the Map Start packet
-	SendMapStart(ev, gs.CompressedMapSize)
-
-	// send newly connected player the Map Chunk packet (includes the whole map for now :D)
-	SendMapChunk(ev, gs.CompressedMap)
-
-	// send newly connected player the State Data packet to let the client know that the map is loaded and to continue on
-	SendStateData(ev, p.ID, gs)
+func AddPacketFunction(id uint8, f PacketFunction) {
+	PacketFuncs[id] = f
 }
 
-func HandleDisconnect(ev enet.Event, gs *game.State) {
-	ip := ev.GetPeer().GetAddress().String()
-	gs.RemovePlayerByIP(ip)
-}
-
-func HandleEventPacketReceived(ev enet.Event, gs *game.State) {
+func PacketHandler(ev enet.Event, gs *game.State) {
 	// Get the packet
 	packet := ev.GetPacket()
 	data := packet.GetData()
-
-	//log.Info("[PACKET]", packet.GetData())
 
 	// We must destroy the packet when we're done with it
 	defer packet.Destroy()
@@ -159,112 +130,18 @@ func HandleEventPacketReceived(ev enet.Event, gs *game.State) {
 	// get packet id
 	packetID := data[0]
 
-	switch packetID {
-	case 0:
-		// Update Player Position
-		HandlePacketPositionData(ev, gs, data[1:])
-	case 1:
-		// Update Player Orientation
-		HandlePacketOrientationData(ev, gs, data[1:])
-	case 3:
-		// Update Player Input Data
-		HandlePacketInputData(gs, data[1:])
-	case 8:
-		// Set Block Color
-		HandlePacketSetBlockColor(data[1:], gs)
-	case 9:
-		// Existing Player
-		HandlePacketExistingPlayer(data[1:], gs)
-
-		// send all players the newly connected player data including current player??
-		newPlayer, err := gs.GetPlayerByIP(ev.GetPeer().GetAddress().String())
-		if err == nil {
-			SendCreatePlayerToAllPlayers(ev, gs, newPlayer)
-		}
+	f, exists := PacketFuncs[packetID]
+	if exists {
+		f(ev, gs, data[1:])
+	} else {
+		log.Warn("[UNKNOWN PACKET] %d", packetID)
 	}
 }
 
-func HandlePacketExistingPlayer(data []byte, gs *game.State) {
-	playerID := data[0]
-	team := data[1]
-	weapon := data[2]
-	held := data[3]
-
-	kills := data[4:8]
-
-	blue := data[8]
-	green := data[9]
-	red := data[10]
-	color := util.NewColor(red, blue, green)
-
-	name := data[11:]
-
-	// update with gamestate
-	if err := gs.UpdatePlayer(playerID, name, team, weapon, held, kills, color); err != nil {
-		log.Error("[UPDATE PLAYER] " + err.Error())
-		return
-	}
-
-	log.Debug("[EXISTING PLAYER PACKET RECEIVED] PlayerID: %d, Team: %d, Weapon: %d, Held: %d, Kills: %d, R,G,B: (%d, %d, %d), Name: %s",
-		playerID, team, weapon, held, kills, red, blue, green, cp437.String(name))
-}
-
-func HandlePacketSetBlockColor(data []byte, gs *game.State) {
-	playerID := data[0]
-	blue := data[1]
-	green := data[2]
-	red := data[3]
-
-	if err := gs.UpdatePlayerBlockColor(playerID, red, green, blue); err != nil {
-		log.Error("[BLOCK COLOR] ", err.Error())
-	}
-
-	log.Debug("[BLOCK COLOR] Set for player %d", playerID)
-}
-
-func HandlePacketPositionData(ev enet.Event, gs *game.State, data []byte) {
-	ip := ev.GetPeer().GetAddress().String()
-
-	p, err := gs.GetPlayerByIP(ip)
-	if err != nil {
-		log.Error("[POSITION DATA] Couldn't set position on server of player that doesn't exist with IP of %s", ip)
-		return
-	}
-
-	p.Position.X = util.Float32FromBytes(data[0:4])
-	p.Position.Y = util.Float32FromBytes(data[4:8])
-	p.Position.Z = util.Float32FromBytes(data[8:12])
-
-	log.Debug("[POSITION DATA] Updating Player '%s' to XYZ: %d,%d,%d", p.Position.Z, p.Position.Y, p.Position.Z)
-}
-
-func HandlePacketOrientationData(ev enet.Event, gs *game.State, data []byte) {
-	ip := ev.GetPeer().GetAddress().String()
-
-	p, err := gs.GetPlayerByIP(ip)
-	if err != nil {
-		log.Error("[ORIENTATION DATA] Couldn't set orientation on server of player that doesn't exist with IP of %s", ip)
-		return
-	}
-
-	p.Orientation.X = util.Float32FromBytes(data[0:4])
-	p.Orientation.Y = util.Float32FromBytes(data[4:8])
-	p.Orientation.Z = util.Float32FromBytes(data[8:12])
-
-	log.Debug("[ORIENTATION DATA] Updating Player '%s' to XYZ: %d,%d,%d", p.Orientation.Z, p.Orientation.Y, p.Orientation.Z)
-}
-
-func HandlePacketInputData(gs *game.State, data []byte) {
-	playerID := data[0]
-	keyState := data[1]
-
-	p, err := gs.GetPlayerByID(playerID)
-	if err != nil {
-		log.Error("[INPUT DATA] Couldn't update key state on server of player #%d", playerID)
-		return
-	}
-
-	p.KeyState = keyState
-
-	log.Debug("[INPUT DATA] Updating Player '%d' input data key state", playerID)
+func InitPacketHandlers() {
+	AddPacketFunction(0, HandlePacketPositionData)
+	AddPacketFunction(1, HandlePacketOrientationData)
+	AddPacketFunction(3, HandlePacketInputData)
+	AddPacketFunction(8, HandlePacketSetBlockColor)
+	AddPacketFunction(9, HandlePacketExistingPlayer)
 }

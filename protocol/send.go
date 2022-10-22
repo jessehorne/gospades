@@ -46,7 +46,7 @@ func SendMapChunk(ev enet.Event, compressedMap []byte) {
 	ev.GetPeer().SendBytes(packet, 0, enet.PacketFlagReliable)
 }
 
-func SendStateData(ev enet.Event, playerID uint8, gs *game.State) {
+func SendStateDataToClient(ev enet.Event, gs *game.State, playerID uint8) {
 	packet := NewStateDataPacket(playerID, gs)
 
 	log.Debug("[PACKET] Sending State Data. Total Packet Size: %d", len(packet))
@@ -54,7 +54,7 @@ func SendStateData(ev enet.Event, playerID uint8, gs *game.State) {
 	ev.GetPeer().SendBytes(packet, 0, enet.PacketFlagReliable)
 }
 
-func SendCreatePlayerToAllPlayers(ev enet.Event, gs *game.State, newPlayer *game.Player) {
+func SendCreatePlayerToAllPlayers(gs *game.State, newPlayer *game.Player) {
 	packet := NewCreatePlayerPacket(newPlayer)
 
 	for p := range gs.Players {
