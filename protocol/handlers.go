@@ -151,3 +151,21 @@ func HandlePacketSetTool(ev enet.Event, gs *game.State, data []byte) {
 
 	p.Tool = tool
 }
+
+func HandlePacketBlockAction(ev enet.Event, gs *game.State, data []byte) {
+	//playerID := data[0]
+	//actionType := data[1] // 0-build, 1-leftButtonDestroy, 2-rightButtonDestroy, 3-grenadeDestroy
+	//xPos := binary.BigEndian.Uint32(data[2:6])
+	//yPos := binary.BigEndian.Uint32(data[6:10])
+	//zPos := binary.BigEndian.Uint32(data[10:14])
+
+	// update block according to action in gamestate
+	// TODO
+
+	// send this action to all clients
+	var newPacket []byte
+	newPacket = append(newPacket, P_BLOCK_ACTION)
+	newPacket = append(newPacket, data...)
+
+	SendBlockActionToAllPlayers(gs, newPacket)
+}

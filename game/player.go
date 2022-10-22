@@ -26,7 +26,7 @@ type Player struct {
 func NewPlayer(peer enet.Peer, username string, id uint8, ip string) Player {
 	return Player{
 		Username:                     username,
-		Position:                     util.NewVec3Float(100.0, 100.0, -2.0),
+		Position:                     util.NewVec3Float(200.0, 200.0, 30.0),
 		Orientation:                  util.NewVec3Float(0.0, 0.0, 0.0),
 		ExistingPlayerPacketReceived: false,
 		IP:                           ip,

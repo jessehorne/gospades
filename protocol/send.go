@@ -64,3 +64,12 @@ func SendCreatePlayerToAllPlayers(gs *game.State, newPlayer *game.Player) {
 
 	log.Debug("[PACKET] Sending Create Player to %d players.", len(gs.Players))
 }
+
+func SendBlockActionToAllPlayers(gs *game.State, packet []byte) {
+	for p := range gs.Players {
+		player := gs.Players[p]
+		player.Peer.SendBytes(packet, 0, enet.PacketFlagReliable)
+	}
+
+	log.Debug("[BROADCAST BLOCK ACTION] Sending Block Action to %d players.", len(gs.Players))
+}
