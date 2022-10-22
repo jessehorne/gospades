@@ -12,16 +12,13 @@ import (
 var ErrPlayerExists = errors.New("player already exists")
 
 type State struct {
+	Config            Config
 	Players           map[uint8]*Player
-	Name              string
-	MaxPlayers        uint8
-	Team1Name         string
-	Team2Name         string
 	CompressedMap     []byte
 	CompressedMapSize []byte
 }
 
-func NewState(name string, maxPlayers uint8, team1Name string, team2Name string) (State, error) {
+func NewState(c Config) (State, error) {
 	// Map stuff
 	mapPath := "./maps/2fort_arena.vxl"
 	compressedMap, leCompressedMapSize, beMapSize, err := util.GetMapAndSize(mapPath)
@@ -32,10 +29,7 @@ func NewState(name string, maxPlayers uint8, team1Name string, team2Name string)
 
 	return State{
 		Players:           map[uint8]*Player{},
-		Name:              name,
-		MaxPlayers:        maxPlayers,
-		Team1Name:         team1Name,
-		Team2Name:         team2Name,
+		Config:            c,
 		CompressedMap:     compressedMap,
 		CompressedMapSize: leCompressedMapSize,
 	}, nil
