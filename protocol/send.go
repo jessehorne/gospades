@@ -81,3 +81,14 @@ func SendBlockLineToAllPlayers(gs *game.State, packet []byte) {
 
 	log.Debug("[BROADCAST BLOCK LINE] Sending Block Line to %d players.", len(gs.Players))
 }
+
+func SendWorldUpdate(gs *game.State) {
+	// build world update packet
+	packet := NewWorldUpdatePacket(gs)
+
+	// send to all players
+	for p := range gs.Players {
+		player := gs.Players[p]
+		player.Peer.SendBytes(packet, 0, enet.PacketFlagUnreliableFragment)
+	}
+}

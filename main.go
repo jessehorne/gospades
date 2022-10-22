@@ -58,7 +58,7 @@ func main() {
 	}
 
 	// initialize packet handlers
-	protocol.InitPacketHandlers()
+	protocol.Init(&gamestate)
 
 	// init enet stuff
 	enet.Initialize()

@@ -4,6 +4,7 @@ import (
 	"github.com/codecat/go-enet"
 	"github.com/codecat/go-libs/log"
 	"github.com/jessehorne/gospades/game"
+	"time"
 )
 
 // Protocol information for Ace of Spades 0.75 according to (http://www.piqueserver.org/aosprotocol/protocol075.html)
@@ -138,7 +139,7 @@ func PacketHandler(ev enet.Event, gs *game.State) {
 	}
 }
 
-func InitPacketHandlers() {
+func Init(gs *game.State) {
 	AddPacketFunction(0, HandlePacketPositionData)
 	AddPacketFunction(1, HandlePacketOrientationData)
 	AddPacketFunction(3, HandlePacketInputData)
@@ -148,4 +149,10 @@ func InitPacketHandlers() {
 	AddPacketFunction(9, HandlePacketExistingPlayer)
 	AddPacketFunction(13, HandlePacketBlockAction)
 	AddPacketFunction(14, HandlePacketBlockLine)
+
+	// send world update 10 times a second
+	go func() {
+		SendWorldUpdate(gs)
+		time.Sleep(100 * time.Millisecond)
+	}()
 }

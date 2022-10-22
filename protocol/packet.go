@@ -146,3 +146,26 @@ func NewCreatePlayerPacket(p *game.Player) []byte {
 
 	return buf
 }
+
+func NewWorldUpdatePacket(gs *game.State) []byte {
+	buf := make([]byte, 1)
+	buf[0] = P_WORLD_UPDATE
+
+	for i := uint8(0); i < gs.MaxPlayers; i++ {
+		p, exists := gs.Players[i]
+		if !exists {
+			buf = append(buf, make([]byte, 24)...) // append 24 bytes (x y z ox oy oz) of padding because this player doesn't exist
+			continue
+		}
+
+		buf = append(buf, util.Float32ToBytes(p.Position.X)...)
+		buf = append(buf, util.Float32ToBytes(p.Position.Y)...)
+		buf = append(buf, util.Float32ToBytes(p.Position.Z)...)
+
+		buf = append(buf, util.Float32ToBytes(p.Orientation.X)...)
+		buf = append(buf, util.Float32ToBytes(p.Orientation.Y)...)
+		buf = append(buf, util.Float32ToBytes(p.Orientation.Z)...)
+	}
+
+	return buf
+}
