@@ -15,31 +15,30 @@ func SendMapStart(ev enet.Event, mapSize []byte) {
 	ev.GetPeer().SendBytes(packet, 0, enet.PacketFlagReliable)
 }
 
-func SendMapChunk(ev enet.Event, compressedMap []byte) {
+func SendMapInManyChunks(ev enet.Event, compressedMap []byte) {
 	// build packets by 4096 bytes
-	//mapSizeInt := len(compressedMap)
-	//chunkCount := (mapSizeInt / 4096) + 1
-	//log.Debug("Sending %d chunks...", chunkCount)
-	//
-	//for i := 0; i < chunkCount; i++ {
-	//	var packet []byte
-	//	section := i * 4096
-	//	end := section + 4096
-	//
-	//	if i == chunkCount-1 {
-	//		log.Debug("Last chunk packet... Section is %d", section)
-	//		packet = NewMapChunkPacket(compressedMap[section : len(compressedMap)-1])
-	//	} else {
-	//		packet = NewMapChunkPacket(compressedMap[section:end])
-	//	}
-	//
-	//	log.Debug("[PACKET] Sending Map Chunk #%d.", i)
-	//	fmt.Println(len(packet))
-	//
-	//	// send packet
-	//	ev.GetPeer().SendBytes(packet, 0, enet.PacketFlagReliable)
-	//}
+	mapSizeInt := len(compressedMap)
+	chunkCount := (mapSizeInt / 4096) + 1
 
+	for i := 0; i < chunkCount; i++ {
+		var packet []byte
+		section := i * 4096
+		end := section + 4096
+
+		if i == chunkCount-1 {
+			packet = NewMapChunkPacket(compressedMap[section : len(compressedMap)-1])
+		} else {
+			packet = NewMapChunkPacket(compressedMap[section:end])
+		}
+
+		log.Debug("[PACKET] Sending Map Chunk #%d.", i+1)
+
+		// send packet
+		ev.GetPeer().SendBytes(packet, 0, enet.PacketFlagReliable)
+	}
+}
+
+func SendMapInOneChunk(ev enet.Event, compressedMap []byte) {
 	packet := NewMapChunkPacket(compressedMap)
 	log.Debug("[PACKET] Sending Map Chunk...")
 

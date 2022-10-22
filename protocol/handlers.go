@@ -25,7 +25,7 @@ func HandleEventConnect(ev enet.Event, gs *game.State) {
 	SendMapStart(ev, gs.CompressedMapSize)
 
 	// send newly connected player the Map Chunk packet (includes the whole map for now :D)
-	SendMapChunk(ev, gs.CompressedMap)
+	SendMapInOneChunk(ev, gs.CompressedMap)
 
 	// send newly connected player the State Data packet to let the client know that the map is loaded and to continue on
 	SendStateDataToClient(ev, gs, p.ID)
