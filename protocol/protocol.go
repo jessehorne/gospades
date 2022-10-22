@@ -147,4 +147,5 @@ func InitPacketHandlers() {
 	AddPacketFunction(8, HandlePacketSetBlockColor)
 	AddPacketFunction(9, HandlePacketExistingPlayer)
 	AddPacketFunction(13, HandlePacketBlockAction)
+	AddPacketFunction(14, HandlePacketBlockLine)
 }

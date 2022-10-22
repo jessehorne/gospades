@@ -169,3 +169,25 @@ func HandlePacketBlockAction(ev enet.Event, gs *game.State, data []byte) {
 
 	SendBlockActionToAllPlayers(gs, newPacket)
 }
+
+func HandlePacketBlockLine(ev enet.Event, gs *game.State, data []byte) {
+	//playerID := data[0]
+	//
+	//startXPos := binary.BigEndian.Uint32(data[1:5])
+	//startYPos := binary.BigEndian.Uint32(data[5:9])
+	//startZPos := binary.BigEndian.Uint32(data[9:13])
+	//
+	//envXPos := binary.BigEndian.Uint32(data[13:17])
+	//envYPos := binary.BigEndian.Uint32(data[17:21])
+	//envZPos := binary.BigEndian.Uint32(data[21:25])
+
+	// update block according to action in gamestate
+	// TODO
+
+	// send this action to all clients
+	var newPacket []byte
+	newPacket = append(newPacket, P_BLOCK_LINE)
+	newPacket = append(newPacket, data...)
+
+	SendBlockLineToAllPlayers(gs, newPacket)
+}
