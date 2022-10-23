@@ -8,6 +8,7 @@ import (
 type Player struct {
 	Username                     string
 	Position                     util.Vec3Float
+	LastPosition                 util.Vec3Float
 	Orientation                  util.Vec3Float
 	ExistingPlayerPacketReceived bool
 	IP                           string
@@ -28,6 +29,7 @@ func NewPlayer(peer enet.Peer, username string, id uint8, ip string) Player {
 	return Player{
 		Username:                     username,
 		Position:                     util.NewVec3Float(200.0, 200.0, 30.0),
+		LastPosition:                 util.NewVec3Float(200.0, 200.0, 30.0),
 		Orientation:                  util.NewVec3Float(0.0, 0.0, 0.0),
 		ExistingPlayerPacketReceived: false,
 		IP:                           ip,

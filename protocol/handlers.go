@@ -88,11 +88,11 @@ func HandlePacketPositionData(ev enet.Event, gs *game.State, data []byte) {
 		return
 	}
 
+	p.LastPosition = p.Position
+
 	p.Position.X = util.Float32FromBytes(data[0:4])
 	p.Position.Y = util.Float32FromBytes(data[4:8])
 	p.Position.Z = util.Float32FromBytes(data[8:12])
-
-	//log.Debug("[POSITION DATA] Updating Player '%s' to XYZ: %d,%d,%d", p.Position.Z, p.Position.Y, p.Position.Z)
 }
 
 func HandlePacketOrientationData(ev enet.Event, gs *game.State, data []byte) {

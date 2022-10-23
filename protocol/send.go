@@ -96,4 +96,5 @@ func SendWorldUpdate(gs *game.State) {
 func SendSetHP(p *game.Player, damageType uint8) {
 	packet := NewSetHPPacket(p, damageType)
 	p.Peer.SendBytes(packet, 0, enet.PacketFlagReliable)
+	//log.Debug("[SET HP PACKET] ", packet)
 }

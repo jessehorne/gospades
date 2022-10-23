@@ -171,7 +171,8 @@ func NewWorldUpdatePacket(gs *game.State) []byte {
 }
 
 func NewSetHPPacket(p *game.Player, damageType uint8) []byte {
-	var buf []byte
+	buf := make([]byte, 1)
+	buf[0] = P_SET_HP
 	buf = append(buf, p.Health)
 	buf = append(buf, damageType)
 	buf = append(buf, util.Float32ToBytes(p.Position.X)...)

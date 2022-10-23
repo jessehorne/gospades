@@ -7,6 +7,6 @@ const (
 	HIT_TYPE_LEGS  uint8 = 3
 	HIT_TYPE_MELEE uint8 = 4
 
-	DAMAGE_TYPE_WEAPON  uint8 = 0
-	DAMAGE_TYPE_GRENADE uint8 = 1
+	DAMAGE_TYPE_FALL   uint8 = 0
+	DAMAGE_TYPE_WEAPON uint8 = 1
 )

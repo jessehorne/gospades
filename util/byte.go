@@ -37,7 +37,7 @@ func ReverseBytes(b []byte) []byte {
 }
 
 func Float32FromBytes(bytes []byte) float32 {
-	bits := binary.BigEndian.Uint32(bytes)
+	bits := binary.LittleEndian.Uint32(bytes)
 	float := math.Float32frombits(bits)
 	return float
 }

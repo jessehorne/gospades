@@ -150,9 +150,9 @@ func Init(gs *game.State) {
 	AddPacketFunction(13, HandlePacketBlockAction)
 	AddPacketFunction(14, HandlePacketBlockLine)
 
-	// send world update 10 times a second
+	// send world update 1 times a second
 	go func() {
 		SendWorldUpdate(gs)
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(1 * time.Second)
 	}()
 }
