@@ -8,14 +8,13 @@ import (
 )
 
 func main() {
-	// TODO CONFIG STUFF
-	conf, err := game.GetConfigFromEnv()
+	err := game.LoadConfigFromLua("creative")
 	if err != nil {
-		log.Error("Couldn't get config from .env", err)
+		panic(err)
 	}
 
 	// init gamestate
-	gamestate, err := game.NewState(conf)
+	gamestate, err := game.NewState(game.Config)
 	if err != nil {
 		log.Error("Error initializing server", err.Error())
 		return

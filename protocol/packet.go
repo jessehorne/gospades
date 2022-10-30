@@ -5,6 +5,7 @@ import (
 	"github.com/BenLubar/df2014/cp437"
 	"github.com/jessehorne/gospades/game"
 	"github.com/jessehorne/gospades/util"
+	"strconv"
 )
 
 func NewMapStartPacket(mapSize []byte) []byte {
@@ -46,7 +47,7 @@ func NewStateDataPacket(playerID uint8, gs *game.State) []byte {
 	buf[10] = uint8(255) // team 2 red
 
 	// append 10 character CP437 string for team 1 name
-	team1Name := cp437.Bytes(gs.Config.Team1Name)
+	team1Name := cp437.Bytes(gs.Config["team1Name"])
 	buf = append(buf, team1Name...)
 	// padding if necessary
 	if len(team1Name) < 10 {
@@ -54,7 +55,7 @@ func NewStateDataPacket(playerID uint8, gs *game.State) []byte {
 	}
 
 	// append 10 character CP437 string for team 2 name
-	team2Name := cp437.Bytes(gs.Config.Team2Name)
+	team2Name := cp437.Bytes(gs.Config["team2Name"])
 	buf = append(buf, team2Name...)
 	// padding if necessary
 	if len(team2Name) < 10 {
@@ -151,7 +152,12 @@ func NewWorldUpdatePacket(gs *game.State) []byte {
 	buf := make([]byte, 1)
 	buf[0] = P_WORLD_UPDATE
 
-	for i := uint8(0); i < gs.Config.MaxPlayers; i++ {
+	test, err := strconv.Atoi(gs.Config["maxPlayers"])
+	if err != nil {
+		return buf
+	}
+	maxPlayers := uint8(test)
+	for i := uint8(0); i < maxPlayers; i++ {
 		p, exists := gs.Players[i]
 		if !exists {
 			buf = append(buf, make([]byte, 24)...) // append 24 bytes (x y z ox oy oz) of padding because this player doesn't exist

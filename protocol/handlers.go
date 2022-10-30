@@ -215,15 +215,15 @@ func HandlePacketHitPacket(ev enet.Event, gs *game.State, data []byte) {
 	var damage uint8
 
 	if hitType == game.HIT_TYPE_TORSO {
-		damage = gs.Config.DamageTorso
+		damage = 50
 	} else if hitType == game.HIT_TYPE_HEAD {
-		damage = gs.Config.DamageHead
+		damage = 100
 	} else if hitType == game.HIT_TYPE_ARMS {
-		damage = gs.Config.DamageArms
+		damage = 33
 	} else if hitType == game.HIT_TYPE_LEGS {
-		damage = gs.Config.DamageLegs
+		damage = 33
 	} else if hitType == game.HIT_TYPE_MELEE {
-		damage = gs.Config.DamageMelee
+		damage = 100
 	}
 
 	damagedPlayer.Hit(damage)
